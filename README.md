@@ -14,34 +14,39 @@ main file:
 | Version | Main file | What it shows |
 |---|---|---|
 | **Original** — the working master | `main-original.tex` | Everything: comments, replies, suggestions, private notes, TODOs, master-only sections. Nothing applied. |
-| **Comment-driven** — what you circulate | `main-comments.tex` | Comments, replies, suggestions and the changes written to address them, each in its author's colour. Line numbers on. Private notes stripped. A point-by-point response letter generated automatically. |
+| **Comment-driven** — what you circulate | `main-comments.tex` | Comments, replies, suggestions and the changes written to address them, each in its author's colour. Line numbers on. Private notes stripped. The editable response letter is appended. |
 | **Ready to submit** | `main-final.tex` | Clean text. No colours, no comments, no line numbers. Pending suggestions resolved by the accept policy. |
+
+The formal response is stored separately in `point-by-point.tex` and can also
+be compiled alone through `main-response.tex`.
 
 No `latexdiff` runs, no duplicated files, no
 `v3_final_JD_comments_REALfinal.tex`.
 
 Every GitHub Actions run provides a downloadable dispatch bundle containing the
-three demo PDFs, an Overleaf-ready ZIP and a complete offline ZIP. Generated
+three manuscript PDFs, a standalone response-letter PDF, an Overleaf-ready ZIP
+and a complete offline ZIP. Generated
 PDFs are not committed, so the repository never drifts away from its source.
 
 ## Quick start on Overleaf
 
 1. Download this repository as a ZIP (green **Code** button → *Download ZIP*).
 2. In Overleaf: **New Project → Upload Project** and drop the ZIP in.
-3. **Menu → Main document** → pick `main-comments.tex` (or whichever version you
-   want to see) and recompile.
+3. Open [START-HERE.md](START-HERE.md) and follow the end-to-end checklist.
+4. **Menu → Main document** → pick `main-original.tex` and recompile.
 
 Switching that one setting is how you switch versions. Everything else stays
 put. Overleaf's free tier is enough. RevMode uses standard LaTeX packages. If
 the optional `ulem` package is absent on a minimal offline installation, it
 falls back automatically to clear `[+]` and `[-]` change marks.
 
-Working locally instead? `make` builds all three PDFs. `make dispatch` also
+Working locally instead? `make` builds all manuscript views and the response
+letter. `make dispatch` also
 creates a clean `dist/` folder that can be shared with collaborators.
 
 ## Setting up your collaborators
 
-Open `revmode-config.tex`. It is the only file you need to touch:
+Open `revmode-config.tex` and replace the demo people with your team:
 
 ```latex
 \definecollab{sam}{S. Hedayati}{revBlue}
@@ -105,14 +110,25 @@ Individual suggestions override the global policy:
 A rejected suggestion still shows in the circulated version, so the record of
 the discussion survives even after the decision is made.
 
-### The response letter writes itself
+### The response letter is a separate editable file
 
-`\printrevisionlog` (already at the end of `main-original.tex` and
-`main-comments.tex`) prints every comment in document order with its page
-number and the replies attached to it. That is your point-by-point response to
-reviewers, assembled from the same text you were commenting on. RevMode 1.0.1
-records these entries during the current compilation, so the section no longer
-depends on an extra hidden build pass.
+Write the formal journal response in `point-by-point.tex`. This separation is
+intentional: inline comments can remain brief and conversational, while the
+author controls the exact wording delivered to the editor.
+
+```latex
+\responseheading
+\responsepoint{R1}{rev}
+  {Please explain the sampling procedure.}
+  {sam}
+  {Thank you. We added a numbered explanation in Section 3.}
+\responsechange{sam}{We draw 1,000 independent scenarios using a fixed seed.}
+```
+
+`main-comments.tex` appends this file after the annotated manuscript.
+`main-response.tex` compiles the same file as a standalone response-letter PDF.
+The older `\printrevisionlog` automatic inline-comment ledger remains available
+for compatibility, but it is no longer the formal response workflow.
 
 ## Package options
 
@@ -157,15 +173,15 @@ travel with the paper.
 For TeXstudio:
 
 1. Install TeX Live, MacTeX or MiKTeX, then open the project folder.
-2. Open the main file you want (`main-original.tex`, `main-comments.tex` or
-   `main-final.tex`) and choose **Options → Define Current Document as Master
-   Document**.
+2. Open the main file you want (`main-original.tex`, `main-comments.tex`,
+   `main-final.tex` or `main-response.tex`) and choose **Options → Define
+   Current Document as Master Document**.
 3. Build twice, or configure `latexmk` as the default compiler.
 
 For a terminal:
 
 ```bash
-make             # build all three PDFs
+make             # build three manuscript views plus the response letter
 make test        # build and verify that content is separated correctly
 make dispatch    # create shareable Overleaf and offline bundles in dist/
 ```
@@ -182,18 +198,20 @@ dist/
 ├── dispatch/
 │   ├── 01-original/manuscript-original.pdf
 │   ├── 02-comment-driven/manuscript-comment-driven.pdf
-│   └── 03-ready-to-submit/manuscript-ready-to-submit.pdf
+│   ├── 03-ready-to-submit/manuscript-ready-to-submit.pdf
+│   └── 04-response-letter/point-by-point-response.pdf
 ├── revmode-overleaf-vX.Y.Z.zip
 └── revmode-offline-vX.Y.Z.zip
 ```
 
 The Overleaf ZIP contains only the source required for an upload. The offline
-ZIP additionally includes the build helpers, tests, documentation and the three
-compiled PDFs.
+ZIP additionally includes the build helpers, tests, documentation, three
+manuscript PDFs and the standalone response-letter PDF.
 
 ## Continuous integration and validation
 
-`.github/workflows/build.yml` compiles all three versions on every push, checks
+`.github/workflows/build.yml` compiles all three versions and the standalone
+response on every push, checks
 that private notes never enter the circulated or final view, checks that the
 final view accepts suggestions and contains no revision markup, and attaches a
 complete dispatch bundle in the **Actions** tab.
@@ -202,8 +220,10 @@ complete dispatch bundle in the **Actions** tab.
 
 - RevMode controls what LaTeX renders; it does not replace Git merge history or
   Overleaf's real-time editing interface.
-- The response ledger follows source order and links replies to the most recent
-  comment. Keep a comment and its replies together in the source.
+- `point-by-point.tex` is intentionally manual. Authors must keep its formal
+  responses aligned with decisions made in the inline manuscript discussion.
+- The optional legacy response ledger follows source order and links replies to
+  the most recent comment. Keep a comment and its replies together when using it.
 - Use the long `\rev...` commands with `short=false` if a journal class or
   another package already owns a short command such as `\comment`.
 - Very complex tracked text inside section titles, captions or PDF bookmarks
@@ -216,7 +236,10 @@ complete dispatch bundle in the **Actions** tab.
 | `revmode.sty` | Standalone package and rendering logic |
 | `revmode-config.tex` | Collaborator names and colours |
 | `manuscript.tex` | One shared manuscript body |
-| `main-*.tex` | Three thin rendering entry points |
+| `point-by-point.tex` | Manually filled formal reviewer response |
+| `main-original.tex`, `main-comments.tex`, `main-final.tex` | Three thin manuscript entry points |
+| `main-response.tex` | Standalone response-letter entry point |
+| `START-HERE.md` | Complete procedure from opening to submission |
 | `scripts/` | Cross-platform build and dispatch helpers |
 | `tests/validate.sh` | Compile-output regression checks |
 | `docs/` | Collaborator setup, offline guide and revision records |

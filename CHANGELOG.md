@@ -3,6 +3,53 @@
 All notable changes to this template are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.1.0] — 2026-09-02
+
+**Status:** review
+
+### Summary
+
+Make the formal point-by-point response an explicit author-edited source file
+and document the complete workflow from opening the project to submission.
+
+### Added
+
+- `point-by-point.tex`, with structured `\responsepoint` and
+  `\responsechange` commands for formal reviewer responses.
+- `main-response.tex` for compiling the response letter as a standalone PDF.
+- `START-HERE.md`, an end-to-end Overleaf, offline, review, acceptance,
+  validation, packaging and submission procedure.
+- A fourth dispatch folder containing the standalone response-letter PDF.
+
+### Changed
+
+- The original and comment-driven views now append the manually curated
+  `point-by-point.tex` file instead of treating the automatic inline-comment
+  ledger as the formal journal response.
+- Local, PowerShell and GitHub Actions builds now compile and validate the
+  standalone response letter.
+
+### Validation
+
+- `make test`: all three manuscript modes and the standalone response compiled;
+  content-separation and response-source assertions passed.
+- `make dispatch`: Overleaf and offline ZIP integrity checks passed, and both
+  packages contain `point-by-point.tex`, `main-response.tex` and
+  `START-HERE.md`.
+- Visual inspection: standalone and appended response pages are legible, use
+  the configured reviewer/author colours and contain no line numbers.
+
+### Compatibility and migration
+
+- Backward compatible. Existing inline markup still works. Existing users can
+  copy the new `point-by-point.tex` and `main-response.tex` files and replace
+  `\printrevisionlog` with `\input{point-by-point}` where desired.
+
+### Known limitations
+
+- Formal responses are intentionally manual and are not synchronized
+  automatically with inline comments; authors must keep both texts aligned.
+
 ## [1.0.1] — 2026-09-02
 
 **Status:** release

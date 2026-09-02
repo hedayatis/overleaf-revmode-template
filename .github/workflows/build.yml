@@ -24,6 +24,7 @@ jobs:
             main-original.tex
             main-comments.tex
             main-final.tex
+            main-response.tex
           latexmk_use_lualatex: false
           args: -pdf -interaction=nonstopmode -file-line-error
 

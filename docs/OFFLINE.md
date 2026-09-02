@@ -22,7 +22,8 @@ optional: without it, RevMode uses visible `[+]`/`[-]` fallback marks.
 5. Build `main-original.tex` while writing, `main-comments.tex` when circulating
    a review, and `main-final.tex` before submission.
 
-If the response ledger says this is the first compilation, build again.
+RevMode fills the response ledger during the current compilation. A second
+build may still be needed for normal LaTeX cross-references and citations.
 
 ## Command line
 

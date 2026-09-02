@@ -24,7 +24,7 @@ Keys come from `revmode-config.tex`. Colour follows the key automatically.
 \finalonly{Funding statements, acknowledgements, journal-only material.}
 
 \revbanner              % header saying which version this is
-\printrevisionlog       % point-by-point response letter (needs 2 compilations)
+\printrevisionlog       % populated point-by-point response letter
 ```
 
 ## Switching version

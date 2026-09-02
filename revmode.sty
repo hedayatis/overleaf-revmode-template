@@ -12,7 +12,7 @@
 %% Copyright (c) 2026 -- released under the MIT Licence.
 %%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{revmode}[2026/09/02 v1.0.0 Three-mode manuscript revision workflow]
+\ProvidesPackage{revmode}[2026/09/02 v1.0.1 Three-mode manuscript revision workflow]
 
 \RequirePackage{kvoptions}
 \SetupKeyvalOptions{family=revmode,prefix=revmode@}
@@ -113,13 +113,18 @@
 
 \newcommand{\rev@writelog}[4]{% {type}{id}{who}{text}
   \ifrevmode@log
-    \protected@write\@auxout{}{%
-      \string\revlog@entry{#1}{#2}{#3}{\thepage}{\unexpanded{#4}}}%
+    % Capture the row immediately. The previous aux-file implementation needed
+    % an undocumented third compilation before the response page was filled.
+    \begingroup
+      \edef\rev@next{\endgroup
+        \noexpand\g@addto@macro\noexpand\rev@loglist{%
+          \noexpand\rev@row{#1}{#2}{#3}{\thepage}{\unexpanded{#4}}}}%
+    \rev@next
   \fi}
 
 \newcommand{\rev@loglist}{}
-\newcommand{\revlog@entry}[5]{%
-  \g@addto@macro\rev@loglist{\rev@row{#1}{#2}{#3}{#4}{#5}}}
+% Ignore records left in an aux file by RevMode 1.0.0.
+\newcommand{\revlog@entry}[5]{}
 
 % ---------------------------------------------------------------------------
 % Low-level rendering helpers
@@ -283,7 +288,7 @@
   \fi\fi}
 
 % \printrevisionlog[Heading] -- every comment and its responses, in document
-% order. Reads the .aux, so it needs two compilations.
+% order. Rows are captured during the current compilation.
 \newcommand{\printrevisionlog}[1][Point-by-point response]{%
   \ifrevmode@log
     \ifrev@markup

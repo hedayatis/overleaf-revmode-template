@@ -3,6 +3,40 @@
 All notable changes to this template are recorded here. Versions follow
 [semantic versioning](https://semver.org/).
 
+## [1.0.1] — 2026-09-02
+
+**Status:** release
+
+### Added
+
+- Dedicated collaborator guide with copy-and-paste examples for names, keys,
+  custom colours, comments, replies, resolved points and suggestions.
+- Regression assertions requiring real comment and response entries in the
+  generated point-by-point section.
+
+### Fixed
+
+- Populate the point-by-point response ledger during the current compilation.
+  Version 1.0.0 could produce only the heading until an additional undocumented
+  compilation was forced.
+
+### Validation
+
+- Clean single-pass pdfLaTeX smoke test: response ledger contains C1–C5 and the
+  associated replies.
+- `make test`: all three modes and response-ledger content checks passed.
+- `make dispatch`: both distribution ZIP integrity checks passed.
+
+### Compatibility and migration
+
+- Backward compatible. Existing markup requires no changes; stale 1.0.0 aux
+  records are ignored safely.
+
+### Known limitations
+
+- Page numbers are captured when each inline comment is processed; unusually
+  complex float-driven layouts should be visually checked.
+
 ## [1.0.0] — 2026-09-02
 
 **Status:** release

@@ -20,10 +20,12 @@ optional: without it, RevMode uses visible `[+]`/`[-]` fallback marks.
 4. In **Options → Configure TeXstudio → Build**, select `Latexmk` as the default
    compiler when available.
 5. Build `main-original.tex` while writing, `main-comments.tex` when circulating
-   a review, and `main-final.tex` before submission.
+   a review, `main-final.tex` before submission, and `main-response.tex` for the
+   separate response letter.
 
-RevMode fills the response ledger during the current compilation. A second
-build may still be needed for normal LaTeX cross-references and citations.
+Fill `point-by-point.tex` manually with the reviewer comments and formal author
+responses. A second build may still be needed for normal LaTeX cross-references
+and citations.
 
 ## Command line
 
@@ -48,6 +50,8 @@ Windows PowerShell:
 - Share the offline ZIP when the recipient wants source, build helpers and PDFs.
 - Share one PDF from `dist/dispatch/` when the recipient only needs to read a
   particular view.
+- Share `04-response-letter/point-by-point-response.pdf` when the journal wants
+  the response letter as a separate upload.
 
 Do not exchange manually renamed manuscript copies. Keep the shared source in
 Git or Overleaf and regenerate the view that each recipient needs.

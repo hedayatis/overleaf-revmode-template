@@ -56,6 +56,9 @@ shown in the PDF, the third is any `xcolor` colour (`revBlue`, `revRed`,
 predefined, print-safe, and reasonably distinguishable; `blue!60!black` works
 just as well). Add as many collaborators as you like.
 
+For a complete copy-and-paste setup with custom colours and an annotated
+review example, see [Defining collaborators, colours and comments](docs/COLLABORATORS.md).
+
 ## The markup
 
 Everything takes the collaborator key as its first argument, so the colour
@@ -107,9 +110,9 @@ the discussion survives even after the decision is made.
 `\printrevisionlog` (already at the end of `main-original.tex` and
 `main-comments.tex`) prints every comment in document order with its page
 number and the replies attached to it. That is your point-by-point response to
-reviewers, assembled from the same text you were commenting on. It reads the
-`.aux` file, so it needs two compilations — Overleaf and `latexmk` both do that
-for you.
+reviewers, assembled from the same text you were commenting on. RevMode 1.0.1
+records these entries during the current compilation, so the section no longer
+depends on an extra hidden build pass.
 
 ## Package options
 
@@ -216,7 +219,7 @@ complete dispatch bundle in the **Actions** tab.
 | `main-*.tex` | Three thin rendering entry points |
 | `scripts/` | Cross-platform build and dispatch helpers |
 | `tests/validate.sh` | Compile-output regression checks |
-| `docs/` | Offline/TeXstudio guide and revision record |
+| `docs/` | Collaborator setup, offline guide and revision records |
 
 ## Contributing
 

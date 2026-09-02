@@ -44,6 +44,10 @@ assert_lacks() {
 assert_has "$tmp_dir/original.normalized.txt" "Private reminder"
 assert_has "$tmp_dir/original.normalized.txt" "Working scratch"
 assert_has "$tmp_dir/comments.normalized.txt" "Point-by-point response"
+assert_has "$tmp_dir/comments.normalized.txt" "[C1] Co-author 1"
+assert_has "$tmp_dir/comments.normalized.txt" "Is this opening too polemical"
+assert_has "$tmp_dir/comments.normalized.txt" "I would rather keep it"
+assert_has "$tmp_dir/comments.normalized.txt" "[C5] Co-author 2"
 assert_lacks "$tmp_dir/comments.normalized.txt" "Private reminder"
 assert_lacks "$tmp_dir/comments.normalized.txt" "Working scratch"
 

@@ -4,7 +4,7 @@ $ErrorActionPreference = "Stop"
 $RepoDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Push-Location $RepoDir
 try {
-    foreach ($Main in @("main-original.tex", "main-comments.tex", "main-final.tex")) {
+    foreach ($Main in @("main-original.tex", "main-comments.tex", "main-final.tex", "main-response.tex")) {
         & latexmk -pdf -interaction=nonstopmode -halt-on-error $Main
         if ($LASTEXITCODE -ne 0) { throw "LaTeX build failed for $Main" }
     }

@@ -1,0 +1,123 @@
+% ===========================================================================
+%  THE MANUSCRIPT -- one body of text, shared by all three versions.
+%  Never duplicate this file. Everything version-specific is a macro.
+% ===========================================================================
+
+\begin{abstract}
+Collaborative revision of a LaTeX manuscript usually degenerates into a folder
+of files named \texttt{v3\_final\_JD\_comments\_REALfinal.tex}. This template
+keeps a single source and derives three documents from it: the working master,
+the comment-driven version circulated among collaborators, and the clean file
+that goes to the journal.
+\end{abstract}
+
+\section{Introduction}
+
+The problem is not that people disagree about a manuscript; it is that the
+disagreement has nowhere to live. A comment written in the margin of a PDF is
+detached from the sentence it concerns, and a sentence rewritten in a private
+copy is detached from the reason it was rewritten.
+\comment{co1}{Is this opening too polemical for a methods paper? I would soften
+it.}%
+\reply{sam}{I would rather keep it. The paper is short and the framing pays for
+itself in the discussion.}
+
+Here the comment and the text are the same object. Every collaborator writes
+into the same file, and the file knows how to hide what a given reader should
+not see.
+\note{sam}{Private reminder: check whether the journal allows line numbers in
+the submitted version.}
+
+\section{How the markup behaves}
+
+\subsection{Comments and responses}
+
+A comment is raised with \verb|\comment{who}{text}| and answered with
+\verb|\reply{who}{text}| when nothing changes, or with
+\verb|\resolved{who}{text}| when something did.
+\comment{rev}{The description of the estimator in Section~2 is too terse to
+reproduce.}%
+\resolved{sam}{Expanded into a numbered procedure with the tolerance stated
+explicitly.}
+
+Both are recorded automatically, so the point-by-point response letter is a
+by-product of the revision rather than a separate document written from memory.
+
+\subsection{Changes and suggestions}
+
+Text written specifically to address a comment is wrapped in
+\verb|\changed{who}{...}|. It is
+\changed{sam}{highlighted in the author's colour while the manuscript is under
+review, and becomes ordinary text in the submitted version.}
+
+A suggestion is different: it is a proposal that has not been acted on yet.
+\verb|\suggest{who}{old}{new}| shows both readings side by side while the
+document is being reviewed, and collapses to one of them in the submitted
+version according to the accept policy. The convergence rate is
+\suggest{co2}{roughly linear}{linear in the number of iterations, with a
+constant that depends on the conditioning of $A$}.
+
+Insertions and deletions work the same way.
+\suggestadd{co2}{We assume throughout that $A$ is symmetric positive definite.}
+The next sentence is redundant and has been proposed for removal.
+\suggestdel{co1}{As is well known, this assumption is standard in the
+literature.}
+
+A single suggestion can override the global policy, which is how a co-author
+records a proposal that was considered and turned down:
+\suggest[reject]{co1}{the residual}{the error}. In the submitted version this
+prints \emph{the residual}, whatever the accept policy says, and the record of
+the discussion survives in the comment-driven version.
+
+\subsection{Mathematics is not a special case}
+
+The markup is inline text, so it lives happily next to displayed equations:
+\begin{equation}
+  \label{eq:fixedpoint}
+  x_{k+1} = x_k - \alpha_k \, A^{-1} r_k ,
+  \qquad r_k = b - A x_k .
+\end{equation}
+Equation~\eqref{eq:fixedpoint} converges for
+\suggest{co2}{$0 < \alpha_k < 1$}{$0 < \alpha_k < 2/\lambda_{\max}(A)$}.%
+\comment{co2}{The step-size condition as written is sufficient but far from
+sharp.}
+\revtodo{sam}{Add the sharp constant and a one-line proof in the appendix.}
+
+\section{Results}
+
+\begin{table}[htbp]
+  \centering
+  \caption{Markup inside floats behaves like markup anywhere else.}
+  \label{tab:demo}
+  \begin{tabular}{lrr}
+    \toprule
+    Method & Iterations & Time (s) \\
+    \midrule
+    Baseline   & 412 & 3.81 \\
+    Proposed   & \suggest{co1}{97}{94} & 0.92 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Table~\ref{tab:demo} reports the iteration counts.
+\comment{co1}{These numbers are from the old run. Please regenerate against the
+current code before we circulate this.}%
+\resolved{sam}{Regenerated; the proposed method now needs 94 iterations.}
+
+\masteronly{%
+\subsection*{Working scratch (master only)}
+This subsection exists only in \texttt{main-original.tex}. It is where the
+derivations that nobody else needs to read can sit without cluttering the
+circulated version.}
+
+\finalonly{%
+\subsection*{Funding}
+This work was supported by \dots{} This paragraph appears only in the submitted
+version, so it does not distract reviewers of the working drafts.}
+
+\section{Conclusion}
+
+One source, three documents, and a response letter that writes itself. The
+alternative is a folder of files nobody trusts.
+\comment{co2}{Add a sentence on how this compares with the \texttt{changes}
+package.}

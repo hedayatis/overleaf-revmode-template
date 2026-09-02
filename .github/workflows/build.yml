@@ -1,0 +1,41 @@
+name: Build, validate and package
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PDF text tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: Compile all modes
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: |
+            main-original.tex
+            main-comments.tex
+            main-final.tex
+          latexmk_use_lualatex: false
+          args: -pdf -interaction=nonstopmode -file-line-error
+
+      - name: Validate mode separation
+        run: bash tests/validate.sh --no-build
+
+      - name: Create dispatch bundle
+        run: bash scripts/make-dispatch.sh --no-build
+
+      - name: Upload complete dispatch bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: revmode-dispatch
+          path: dist/
+          if-no-files-found: error

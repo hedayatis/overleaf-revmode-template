@@ -1,0 +1,23 @@
+% ===========================================================================
+%  VERSION 2 of 3 -- COMMENT-DRIVEN (what you circulate)
+%
+%  Comments, replies, suggestions and the changes written to address them,
+%  each in the colour of the collaborator who owns it. Line numbers are on.
+%  Private notes and TODOs are stripped. A point-by-point response letter is
+%  generated automatically at the end.
+%
+%  On Overleaf: Menu -> Main document -> main-comments.tex
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[mode=comments,accept=all]{revmode}
+
+\input{revmode-config}
+\input{preamble}
+
+\begin{document}
+\maketitle
+\revbanner
+\input{manuscript}
+\printrevisionlog
+\end{document}

@@ -1,0 +1,24 @@
+% ===========================================================================
+%  VERSION 3 of 3 -- READY TO SUBMIT
+%
+%  A clean manuscript. No comments, no replies, no colours, no line numbers,
+%  no private notes. The only decision left is the accept policy:
+%
+%     accept=all   every pending suggestion is applied  <- the default
+%     accept=none  every pending suggestion is discarded (original wording)
+%
+%  Individual suggestions can override it: \suggest[reject]{co1}{old}{new}
+%
+%  On Overleaf: Menu -> Main document -> main-final.tex
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[mode=final,accept=all]{revmode}
+
+\input{revmode-config}
+\input{preamble}
+
+\begin{document}
+\maketitle
+\input{manuscript}
+\end{document}

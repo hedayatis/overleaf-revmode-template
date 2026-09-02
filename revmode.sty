@@ -12,7 +12,7 @@
 %% Copyright (c) 2026 -- released under the MIT Licence.
 %%
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{revmode}[2026/09/02 v1.0.1 Three-mode manuscript revision workflow]
+\ProvidesPackage{revmode}[2026/09/02 v1.1.0 Three-mode manuscript revision workflow]
 
 \RequirePackage{kvoptions}
 \SetupKeyvalOptions{family=revmode,prefix=revmode@}
@@ -286,6 +286,32 @@
   \else
     \noindent\hspace*{1.2em}{\color{\rev@getcolor{#3}}$\hookrightarrow$~\textbf{\rev@getname{#3}}:}~#5\par
   \fi\fi}
+
+% ---------------------------------------------------------------------------
+% Manually curated point-by-point response letter
+% ---------------------------------------------------------------------------
+% Keep these commands in a separate point-by-point.tex file. Unlike the
+% automatic inline-comment ledger below, this file is deliberately edited by
+% the authors and can also be compiled through main-response.tex.
+\newcommand{\responseheading}[1][Point-by-point response]{%
+  \clearpage
+  \ifrevmode@lineno\nolinenumbers\fi
+  \section*{#1}}
+
+% \responsepoint{id}{commenter}{comment}{responder}{response}
+\newcommand{\responsepoint}[5]{%
+  \par\vspace{0.9\baselineskip}%
+  \noindent{\color{\rev@getcolor{#2}}\textbf{[#1]}~%
+    \textbf{\rev@getname{#2}}}\par
+  \nobreak\noindent#3\par
+  \nobreak\noindent\hspace*{1.2em}{\color{\rev@getcolor{#4}}%
+    $\hookrightarrow$~\textbf{\rev@getname{#4}:}}~#5\par}
+
+% Optional quotation of the exact manuscript text added or changed.
+% \responsechange{who}{text}
+\newcommand{\responsechange}[2]{%
+  \nobreak\noindent\hspace*{1.2em}{\color{\rev@getcolor{#1}}%
+    \rev@check~\textbf{Change in manuscript:}}~\emph{#2}\par}
 
 % \printrevisionlog[Heading] -- every comment and its responses, in document
 % order. Rows are captured during the current compilation.

@@ -18,16 +18,19 @@ mkdir -p \
   "$dist_dir/dispatch/01-original" \
   "$dist_dir/dispatch/02-comment-driven" \
   "$dist_dir/dispatch/03-ready-to-submit" \
+  "$dist_dir/dispatch/04-response-letter" \
   "$stage_dir/revmode-overleaf" \
   "$stage_dir/revmode-offline"
 
 cp main-original.pdf "$dist_dir/dispatch/01-original/manuscript-original.pdf"
 cp main-comments.pdf "$dist_dir/dispatch/02-comment-driven/manuscript-comment-driven.pdf"
 cp main-final.pdf "$dist_dir/dispatch/03-ready-to-submit/manuscript-ready-to-submit.pdf"
+cp main-response.pdf "$dist_dir/dispatch/04-response-letter/point-by-point-response.pdf"
 
 source_files=(
-  main-original.tex main-comments.tex main-final.tex manuscript.tex preamble.tex
-  revmode.sty revmode-config.tex README.md CHEATSHEET.md LICENSE VERSION
+  main-original.tex main-comments.tex main-final.tex main-response.tex
+  manuscript.tex point-by-point.tex preamble.tex revmode.sty revmode-config.tex
+  README.md START-HERE.md CHEATSHEET.md LICENSE VERSION
   docs/COLLABORATORS.md
 )
 for file in "${source_files[@]}"; do

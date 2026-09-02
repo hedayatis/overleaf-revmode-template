@@ -24,15 +24,26 @@ Keys come from `revmode-config.tex`. Colour follows the key automatically.
 \finalonly{Funding statements, acknowledgements, journal-only material.}
 
 \revbanner              % header saying which version this is
-\printrevisionlog       % populated point-by-point response letter
+```
+
+In the separate `point-by-point.tex` file:
+
+```latex
+\responseheading
+\responsepoint{R1}{rev}
+  {Reviewer comment copied here.}
+  {sam}
+  {Formal author response written here.}
+\responsechange{sam}{Exact revised manuscript text, when useful.}
 ```
 
 ## Switching version
 
 Overleaf: **Menu → Main document →** `main-original.tex` /
-`main-comments.tex` / `main-final.tex`.
+`main-comments.tex` / `main-final.tex` / `main-response.tex`.
 
-Locally: `make original`, `make comments`, `make final`, or `make` for all three.
+Locally: `make original`, `make comments`, `make final`, `make response`, or
+`make` for every PDF.
 
 ## Accept policy (submitted version only)
 

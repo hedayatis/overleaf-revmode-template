@@ -69,18 +69,21 @@ Override the global final-mode policy for one suggestion:
 \suggest[reject]{sara}{retained wording}{rejected wording}
 ```
 
-## 4. Generate the point-by-point response
+## 4. Fill the separate point-by-point response
 
-Keep this after the manuscript input in the original and comment-driven main
-files:
+Open `point-by-point.tex` and write one formal entry per reviewer comment:
 
 ```latex
-\input{manuscript}
-\printrevisionlog[Point-by-point response]
+\responseheading
+\responsepoint{R1}{reviewer1}
+  {Please explain the sampling procedure.}
+  {sam}
+  {Thank you. We added a numbered explanation in Section 3.}
+\responsechange{sam}{Exact text added to the revised manuscript.}
 ```
 
-The response section is populated in the same compilation and lists comments,
-replies and resolved points in manuscript order.
+Compile `main-response.tex` for a standalone response letter. The same file is
+appended to `main-original.tex` and `main-comments.tex`.
 
 ## 5. Produce a clean submission
 

@@ -1,0 +1,302 @@
+%%
+%% revmode.sty -- one source, three renderings.
+%%
+%%   mode=original  : the working master. Everything is visible, including
+%%                    private notes and TODOs. Nothing is applied.
+%%   mode=comments  : the comment-driven view. Comments, replies, suggestions
+%%                    and the changes made to address them, each in the colour
+%%                    of the collaborator who owns them. Private notes stripped.
+%%   mode=final     : ready to submit. No markup at all. Pending suggestions
+%%                    are resolved according to the accept policy.
+%%
+%% Copyright (c) 2026 -- released under the MIT Licence.
+%%
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{revmode}[2026/09/02 v1.0.0 Three-mode manuscript revision workflow]
+
+\RequirePackage{kvoptions}
+\SetupKeyvalOptions{family=revmode,prefix=revmode@}
+
+% mode   = original | comments | final
+% accept = all | none    -- what mode=final does with still-pending suggestions
+% log    = true | false  -- record comments/replies for \printrevisionlog
+% lineno = true | false  -- line numbers (forced on in mode=comments)
+% marks  = true | false  -- superscript [C1] anchors in the review modes
+% short  = true | false  -- also provide \comment, \reply, ... as aliases
+\DeclareStringOption[original]{mode}
+\DeclareStringOption[all]{accept}
+\DeclareBoolOption[true]{log}
+\DeclareBoolOption[false]{lineno}
+\DeclareBoolOption[true]{marks}
+\DeclareBoolOption[true]{short}
+\ProcessKeyvalOptions*
+
+\RequirePackage{xcolor}
+
+% ulem gives attractive, line-breaking underlines and strikeouts when it is
+% available. Minimal TeX installations do not always ship it, so RevMode has
+% a dependency-free fallback instead of refusing to compile offline.
+\IfFileExists{ulem.sty}{%
+  \RequirePackage[normalem]{ulem}%
+  \newcommand{\rev@insert}[1]{\uline{##1}}%
+  \newcommand{\rev@remove}[1]{\sout{##1}}%
+}{%
+  \PackageWarningNoLine{revmode}{ulem.sty not found; using [+]/[-] change marks}%
+  \newcommand{\rev@insert}[1]{\textsuperscript{[+]}##1}%
+  \newcommand{\rev@remove}[1]{\textsuperscript{[-]}##1}%
+}
+
+% ---------------------------------------------------------------------------
+% Mode resolution
+% ---------------------------------------------------------------------------
+\newif\ifrev@original \newif\ifrev@comments \newif\ifrev@final
+\newif\ifrev@markup   % true whenever any markup is shown at all
+
+\def\rev@modeoriginal{original}
+\def\rev@modecomments{comments}
+\def\rev@modefinal{final}
+
+\edef\rev@thismode{\revmode@mode}
+\ifx\rev@thismode\rev@modeoriginal
+  \rev@originaltrue \rev@markuptrue
+\else\ifx\rev@thismode\rev@modecomments
+  \rev@commentstrue \rev@markuptrue
+  \revmode@linenotrue
+\else\ifx\rev@thismode\rev@modefinal
+  \rev@finaltrue \rev@markupfalse
+\else
+  \PackageError{revmode}{Unknown mode `\revmode@mode'}%
+    {Use mode=original, mode=comments or mode=final.}%
+  \rev@originaltrue \rev@markuptrue
+\fi\fi\fi
+
+\ifrevmode@lineno
+  \RequirePackage{lineno}
+  \AtBeginDocument{\linenumbers}
+\fi
+
+\AtBeginDocument{\providecommand{\checkmark}{\surd}}
+\newcommand{\rev@check}{\ensuremath{\checkmark}}
+
+% ---------------------------------------------------------------------------
+% Collaborators
+% ---------------------------------------------------------------------------
+% \definecollab{key}{Display Name}{xcolor colour}
+\newcommand{\definecollab}[3]{%
+  \expandafter\gdef\csname revmode@nm@#1\endcsname{#2}%
+  \expandafter\gdef\csname revmode@col@#1\endcsname{#3}%
+}
+
+\newcommand{\rev@getname}[1]{%
+  \ifcsname revmode@nm@#1\endcsname\csname revmode@nm@#1\endcsname\else#1\fi}
+\newcommand{\rev@getcolor}[1]{%
+  \ifcsname revmode@col@#1\endcsname\csname revmode@col@#1\endcsname\else revUnknown\fi}
+
+% A print-safe default palette. Redefine freely in your own config file.
+\definecolor{revUnknown}{HTML}{707070}
+\definecolor{revBlue}{HTML}{1F5FA9}
+\definecolor{revRed}{HTML}{B4232B}
+\definecolor{revGreen}{HTML}{1B7A46}
+\definecolor{revPurple}{HTML}{7A2E8E}
+\definecolor{revOrange}{HTML}{C2620A}
+\definecolor{revTeal}{HTML}{0F6E77}
+\definecolor{revBrown}{HTML}{7A5230}
+\definecolor{revPink}{HTML}{B03A78}
+
+% ---------------------------------------------------------------------------
+% Counters and the revision log
+% ---------------------------------------------------------------------------
+\newcounter{revid}
+\renewcommand{\therevid}{C\arabic{revid}}
+
+\def\rev@currentid{--}
+
+\newcommand{\rev@writelog}[4]{% {type}{id}{who}{text}
+  \ifrevmode@log
+    \protected@write\@auxout{}{%
+      \string\revlog@entry{#1}{#2}{#3}{\thepage}{\unexpanded{#4}}}%
+  \fi}
+
+\newcommand{\rev@loglist}{}
+\newcommand{\revlog@entry}[5]{%
+  \g@addto@macro\rev@loglist{\rev@row{#1}{#2}{#3}{#4}{#5}}}
+
+% ---------------------------------------------------------------------------
+% Low-level rendering helpers
+% ---------------------------------------------------------------------------
+\newcommand{\rev@tag}[2]{% {colour}{content} -- breakable coloured inline note
+  {\normalfont\sffamily\footnotesize\color{#1}#2}}
+
+\newcommand{\rev@anchor}[2]{% {colour}{id}
+  \ifrevmode@marks{\color{#1}\textsuperscript{\sffamily\scriptsize#2}}\fi}
+
+% ---------------------------------------------------------------------------
+% The markup itself
+% ---------------------------------------------------------------------------
+
+% \revcomment{who}{text} -- a query raised by `who'
+\DeclareRobustCommand{\revcomment}[2]{%
+  \stepcounter{revid}%
+  \xdef\rev@currentid{\therevid}%
+  \rev@writelog{comment}{\therevid}{#1}{#2}%
+  \ifrev@markup
+    \ifrevmode@marks
+      \rev@anchor{\rev@getcolor{#1}}{\therevid}%
+      \rev@tag{\rev@getcolor{#1}}{\,[\rev@getname{#1}: #2]\,}%
+    \else
+      \rev@tag{\rev@getcolor{#1}}{\,[\therevid\ \rev@getname{#1}: #2]\,}%
+    \fi
+  \fi}
+
+% \revreply{who}{text} -- a response that changes nothing in the text
+\DeclareRobustCommand{\revreply}[2]{%
+  \rev@writelog{reply}{\rev@currentid}{#1}{#2}%
+  \ifrev@markup
+    \rev@tag{\rev@getcolor{#1}}{\,[$\hookrightarrow$\,\rev@getname{#1}: #2]\,}%
+  \fi}
+
+% \revresolved{who}{text} -- a response stating how the point was addressed
+\DeclareRobustCommand{\revresolved}[2]{%
+  \rev@writelog{resolved}{\rev@currentid}{#1}{#2}%
+  \ifrev@markup
+    \rev@tag{\rev@getcolor{#1}}{\,[\rev@check\,\rev@getname{#1}: #2]\,}%
+  \fi}
+
+% \revchanged{who}{text} -- text actually written to address a comment.
+% It survives into the submitted version; only the highlighting disappears.
+\DeclareRobustCommand{\revchanged}[2]{%
+  \ifrev@markup
+    {\color{\rev@getcolor{#1}}\rev@insert{#2}}%
+  \else
+    #2%
+  \fi}
+
+% \revsuggest[policy]{who}{old}{new} -- a proposed replacement
+\DeclareRobustCommand{\revsuggest}{%
+  \@ifnextchar[\rev@suggest@opt{\rev@suggest@opt[\revmode@accept]}}
+\def\rev@suggest@opt[#1]#2#3#4{%
+  \ifrev@markup
+    {\color{\rev@getcolor{#2}}\rev@remove{#3}\,\rev@insert{#4}}%
+  \else
+    \rev@decide{#1}{#4}{#3}%
+  \fi}
+
+% \revadd[policy]{who}{text} -- a proposed insertion
+\DeclareRobustCommand{\revadd}{%
+  \@ifnextchar[\rev@add@opt{\rev@add@opt[\revmode@accept]}}
+\def\rev@add@opt[#1]#2#3{%
+  \ifrev@markup
+    {\color{\rev@getcolor{#2}}\rev@insert{#3}}%
+  \else
+    \rev@decide{#1}{#3}{}%
+  \fi}
+
+% \revdel[policy]{who}{text} -- a proposed deletion
+\DeclareRobustCommand{\revdel}{%
+  \@ifnextchar[\rev@del@opt{\rev@del@opt[\revmode@accept]}}
+\def\rev@del@opt[#1]#2#3{%
+  \ifrev@markup
+    {\color{\rev@getcolor{#2}}\rev@remove{#3}}%
+  \else
+    \rev@decide{#1}{}{#3}%
+  \fi}
+
+% \rev@decide{policy}{if accepted}{if rejected}
+\def\rev@accepttoken{accept}
+\def\rev@alltoken{all}
+\newcommand{\rev@decide}[3]{%
+  \edef\rev@p{#1}%
+  \ifx\rev@p\rev@accepttoken #2\else
+  \ifx\rev@p\rev@alltoken #2\else #3\fi\fi}
+
+% \revnote{who}{text} / \revtodo{who}{text} -- private, mode=original only
+\DeclareRobustCommand{\revnote}[2]{%
+  \ifrev@original
+    \rev@tag{\rev@getcolor{#1}}{\,[note, \rev@getname{#1}: #2]\,}%
+  \fi}
+\DeclareRobustCommand{\revtodo}[2]{%
+  \ifrev@original
+    \rev@tag{\rev@getcolor{#1}}{\,[\textbf{TODO} \rev@getname{#1}: #2]\,}%
+  \fi}
+
+% Block-level switches
+\DeclareRobustCommand{\masteronly}[1]{\ifrev@original#1\fi}
+\DeclareRobustCommand{\finalonly}[1]{\ifrev@final#1\fi}
+\DeclareRobustCommand{\reviewonly}[1]{\ifrev@markup#1\fi}
+
+% ---------------------------------------------------------------------------
+% Short aliases (option short=false turns them off)
+% ---------------------------------------------------------------------------
+\newcommand{\rev@alias}[2]{%
+  \ifcsname #1\endcsname
+    \PackageWarning{revmode}{Redefining \expandafter\string\csname #1\endcsname\space
+      (another package defined it first). Load revmode with short=false to keep
+      the original meaning and use \expandafter\string\csname #2\endcsname\space instead}%
+  \fi
+  \expandafter\let\csname #1\expandafter\endcsname\csname #2\endcsname}
+
+\ifrevmode@short
+  \AtBeginDocument{%
+    \rev@alias{comment}{revcomment}%
+    \rev@alias{reply}{revreply}%
+    \rev@alias{resolved}{revresolved}%
+    \rev@alias{changed}{revchanged}%
+    \rev@alias{suggest}{revsuggest}%
+    \rev@alias{suggestadd}{revadd}%
+    \rev@alias{suggestdel}{revdel}%
+    \rev@alias{note}{revnote}%
+  }
+\fi
+
+% ---------------------------------------------------------------------------
+% Banner and point-by-point log
+% ---------------------------------------------------------------------------
+\newcommand{\revbanner}{%
+  \ifrev@markup
+    \begingroup
+      \sffamily\footnotesize
+      \noindent\colorbox{black!7}{%
+        \parbox{\dimexpr\linewidth-2\fboxsep}{%
+          \textbf{revmode: \revmode@mode.}\ %
+          \ifrev@original Everything is visible here, including private notes
+            and TODOs. Nothing has been applied.\fi
+          \ifrev@comments Private notes are hidden. Accept policy for the
+            submitted version: \texttt{\revmode@accept}.\fi}}%
+      \par\vspace{0.8\baselineskip}%
+    \endgroup
+  \fi}
+
+\def\rev@ty@comment{comment}
+\def\rev@ty@resolved{resolved}
+
+\newcommand{\rev@row}[5]{% {type}{id}{who}{page}{text}
+  \edef\rev@t{#1}%
+  \ifx\rev@t\rev@ty@comment
+    \par\vspace{0.7\baselineskip}%
+    \noindent{\color{\rev@getcolor{#3}}\textbf{[#2]}~\textbf{\rev@getname{#3}}}%
+    \nobreak\hfill{\footnotesize\color{black!55}p.~#4}\par
+    \nobreak\noindent#5\par
+  \else\ifx\rev@t\rev@ty@resolved
+    \noindent\hspace*{1.2em}{\color{\rev@getcolor{#3}}\rev@check~\textbf{\rev@getname{#3}}:}~#5\par
+  \else
+    \noindent\hspace*{1.2em}{\color{\rev@getcolor{#3}}$\hookrightarrow$~\textbf{\rev@getname{#3}}:}~#5\par
+  \fi\fi}
+
+% \printrevisionlog[Heading] -- every comment and its responses, in document
+% order. Reads the .aux, so it needs two compilations.
+\newcommand{\printrevisionlog}[1][Point-by-point response]{%
+  \ifrevmode@log
+    \ifrev@markup
+      \clearpage
+      \ifrevmode@lineno\nolinenumbers\fi
+      \section*{#1}%
+      \ifx\rev@loglist\@empty
+        \emph{No comments recorded, or this is the first compilation --
+              run LaTeX once more.}\par
+      \else
+        \begingroup\raggedright\rev@loglist\par\endgroup
+      \fi
+    \fi
+  \fi}
+
+\endinput

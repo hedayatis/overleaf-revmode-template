@@ -1,0 +1,22 @@
+% ===========================================================================
+%  VERSION 1 of 3 -- ORIGINAL (the working master)
+%
+%  Everything is visible: comments, replies, suggestions, private notes,
+%  TODOs, and material wrapped in \masteronly{...}. Nothing is applied.
+%  This is the version you and your co-authors actually work in.
+%
+%  On Overleaf: Menu -> Main document -> main-original.tex
+% ===========================================================================
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[mode=original]{revmode}
+
+\input{revmode-config}
+\input{preamble}
+
+\begin{document}
+\maketitle
+\revbanner
+\input{manuscript}
+\printrevisionlog[Comment ledger]
+\end{document}

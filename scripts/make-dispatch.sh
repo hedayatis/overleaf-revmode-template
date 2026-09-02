@@ -28,8 +28,10 @@ cp main-final.pdf "$dist_dir/dispatch/03-ready-to-submit/manuscript-ready-to-sub
 source_files=(
   main-original.tex main-comments.tex main-final.tex manuscript.tex preamble.tex
   revmode.sty revmode-config.tex README.md CHEATSHEET.md LICENSE VERSION
+  docs/COLLABORATORS.md
 )
 for file in "${source_files[@]}"; do
+  mkdir -p "$stage_dir/revmode-overleaf/$(dirname "$file")"
   cp "$file" "$stage_dir/revmode-overleaf/$file"
 done
 
